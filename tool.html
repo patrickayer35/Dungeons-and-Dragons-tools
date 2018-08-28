@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		* {
+		    box-sizing: border-box;
+		}
+
+		/* Create two equal columns that floats next to each other */
+		.left-side {
+		    float: left;
+		    width: 70%;
+		    padding: 10px;
+		}
+
+		.right-side {
+			float: left;
+		    width: 30%;
+		    padding: 5px;
+		}
+		
+		.uniques-column {
+			width: 50%;
+			padding: 10px;
+			float: left;
+		}
+
+		.non-uniques-column {
+			width: 50%;
+			padding: 10px;
+			float: left;
+		}
+		
+	</style>
+</head>
+<body>
+	
+	<h2 style="color:DarkRed;font-family:courier">D&D Encounter Manager</h2>
+	
+	<div class="row">
+		<div class="left-side">
+			<div class="startup-buttons" id="startup-buttons">
+  				<button type="button" class="start-new-session" id="start-new-session" onClick="startNewSession()">Start New Session</button>
+  				<button type="button" class="load-previous-session" id="load-previous-session" onClick="loadPreviousSession()">Load Last Session</button>
+			</div>
+			<div class="edit-current-session-buttons" id="edit-current-session-buttons" style="display:none">
+				<button type="button" class="display-pc-form" id="display-pc-form" onClick="showElement('pc-form')">Add PC</button>
+				<button type="button" class="display-npc-form" id="display-npc-form" onClick="showElement('npc-form')">Add NPC</button>
+				<button type="button" class="done-adding-characters" id="done-adding-characters" onClick="doneAddingCharacters()">Done</button>
+				<button type="button" class="cancel-session-edit" id="cancel-session-edit" onClick="returnToStartup()">Cancel</button>
+				<!-- <button type="button" class="auto-generate-test-characters" id="auto-generate-test-characters">Auto-Generate Test Characters</button> -->
+			</div>
+			<div class="running-the-session-buttons" id="running-the-session-buttons" style="display:none">
+				<button type="button" class="edit-current-session" id="edit-current-session" onClick="editSession()">Edit Session</button>
+  				<button type="button" class="save-session" id="save-session">Save Session</button>
+				<button type="button" class="start-an-encounter" id="start-an-encounter" onClick="startNewEncounter()">Start New Ecounter</button>
+				<button type="button" class="back-to-startup" id="back-to-startup" onClick="returnToStartup()">Back to Home</button>
+			</div>
+			<div class="encounter-buttons" id="encounter-buttons" style="display:none">
+				<button type="button" class="begin-encounter!" id="begin-encounter!" onClick="startEncounter()">START!</button>
+  				<button type="button" class="cancel-encounter" id="cancel-encounter" onClick="endEncounter()">Cancel</button>
+			</div>
+			<div id="roll-for-initiative" style="display:none">
+				<h3 class="initiative-header" id="initative-header" style="color:DarkRed;font-family:courier">Roll For Initiative</h3>
+				<p id="encounter-instructions">Select the characters to add to the encounter...</p>
+				<p id="encounter-instructions-2">All characters marked with (*) require an initiative roll to continue</p>
+				<table id="pre-encounter-table" class="pre-encounter-table">
+				</table>
+			</div>
+		</br>
+			<table id="encounter-table" style="width:100%;table-layout:auto;empty-cells:show;display:none">
+				<thead class="encounter-head" style="color:DarkRed;font-family:courier">
+					<tr>
+						<th scope="col">Spells Affecting</th>
+						<th scope="col">Spells Using</th>
+						<th scope="col">Character Name</th>
+						<th scope="col">Initiative</th>
+						<th scope="col">Hit Points</th>
+						<th scope="col">Page Number</th>
+						<th scope="col"></th> <!-- subtract HP input field-->
+						<th scope="col"></th> <!-- subtract button-->
+						<!--<th scope="col"></th> remove from encounter //text should switch to "undo", which resets the row-->
+						<th scope="col"></th> <!-- hidden index container-->
+					</tr>
+				</thead>
+				<tbody class="encounter-body" id="encounter-body-i">
+				</tbody>
+			</table>
+			<form id="pc-form" style="display:none">
+				<h3 class="pc-form-header" id="pc-form-header">Create PC</h3>
+					<table>
+						<tr>
+							<td>
+								Player Name: 
+							</td>
+							<td>
+								<input type="text" id="pc-playerName"/>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Character Name: 
+							</td>
+							<td>
+								<input type="text" id="pc-characterName"/>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Race: 
+							</td>
+							<td>
+								<input type="text" id="pc-race"/>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Class: 
+							</td>
+							<td>
+								<input type="text" id="pc-class"/>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Passive Perception: 
+							</td>
+							<td>
+								<input type="number" id="pc-passPerc"/>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Dexterity: 
+							</td>
+							<td>
+								<input type="number" id="pc-dexterity"/>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Current HP: 
+							</td>
+							<td>
+								<input type="number" id="pc-currHP"/>
+							</td>
+						</tr>
+					</table>
+				</br>
+					<table>
+						<div>
+							<div class="create-pc-form-buttons" id="create-pc-form-buttons">
+								<button type="button" class="create-pc-button" id="create-pc-button" onClick="createPC()">Create PC</button>
+								<button type="button" class="cancel-pc-create" id="cancel-pc-create" onClick="clearPCFormConfirm()">Cancel</button>
+							</div>
+							<div class="edit-pc-form-buttons" id="edit-pc-form-buttons" style="display:none">
+								<button type="button" class="edit-pc-button" id="edit-pc-button" onClick="editPC()">Save</button>
+								<button type="button" class="cancel-pc-edit" id="cancel-pc-edit" onClick="cancelPCEdit()">Cancel</button>
+							</div>
+						</div>
+					</table>
+			</form>
+			<form id="npc-form" style="display:none">
+				<h3 class="npc-form-header" id="npc-form-header">Create NPC</h3>
+				<table>
+					<tr>
+						<td>
+							Monster Name: 
+						</td>
+						<td>
+							<input type="text" id="npc-monsterName"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Race: 
+						</td>
+						<td>
+							<input type="text" id="npc-race"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Hit Points: 
+						</td>
+						<td>
+							<input type="number" id="npc-hp"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Hit Dice: 
+						</td>
+						<td>
+							<input type="number" id="npc-hitDice"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+						</td>
+						<td>
+							<input type="radio" name="dice" id="npc-d4"/>d4
+							<input type="radio" name="dice" id="npc-d6"/>d6
+							<input type="radio" name="dice" id="npc-d8"/>d8
+							<input type="radio" name="dice" id="npc-d10"/>d10
+							<input type="radio" name="dice" id="npc-d12"/>d12
+							<input type="radio" name="dice" id="npc-d20"/>d20
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Modifier: 
+						</td>
+						<td>
+							<input type="number" id="npc-modifier"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Dexterity: 
+						</td>
+						<td>
+							<input type="number" id="npc-dexterity"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Page Number: 
+						</td>
+						<td>
+							<input type="number" id="npc-pageNo"/>
+						</td>
+					</tr>
+				</table>
+			</br>
+				<table>
+					<div>
+						<div class="create-npc-form-buttons" id="create-npc-form-buttons">
+							<button type="button" class="create-npc-button" id="create-npc-button" onClick="createNPC()">Create NPC</button>
+							<button type="button" class="cancel-npc-create" id="cancel-npc-create" onClick="clearNPCFormConfirm()">Cancel</button>
+						</div>
+						<div class="edit-npc-form-buttons" id="edit-npc-form-buttons" style="display:none">
+							<button type="button" class="edit-npc-button" id="edit-npc-button" onClick="editNPC()">Save</button>
+							<button type="button" class="cancel-npc-edit" id="cancel-npc-edit" onClick="cancelNPCEdit()">Cancel</button>
+						</div>
+					</div>
+				</table>
+			</form>
+		</div>
+		<div class="right-side">
+			<div id="character-list-header" style="display:none">
+				<h3 style="color:DarkRed;font-family:courier">Character List</h2>
+				<p id="character-list-note">* = unique character</p>
+				<table id="character-list-table">
+				</table>
+			</div>
+		</div>
+	</div>
+	<button type="button" id="trigger-save-session" style="display:none"></button>
+	
+	<script type="text/javascript" src="session_data.json"></script>
+	<script>
+		
+		var characters = [];
+		var encountPart = [];
+		var pcEdit = null;
+		var npcEdit = null;
+		//var elem = document.getElementById("create-pc-button");
+		//elem.addEventListener("click", createPC, false);
+		
+		function showElement(e)
+		{
+			document.getElementById(e).style.display = "block";
+		}
+		
+		function hideElement(e)
+		{
+			document.getElementById(e).style.display = "none";
+		}
+		
+		function startNewSession()
+		{
+			hideElement("startup-buttons");
+			showElement("edit-current-session-buttons");
+		}
+		
+		function hideCharacterForms()
+		{
+			document.getElementById("pc-form").style.display = "none";
+			document.getElementById("npc-form").style.display = "none";
+		}
+		
+		function doneAddingCharacters()
+		{
+			if (characters.length < 1)
+			{
+				alert("You must add at least one character to continue.");
+			}
+			else
+			{
+				hideElement("edit-current-session-buttons");
+				showElement("running-the-session-buttons");
+				// write logic for clearing pc-form and npc-form
+				hideCharacterForms();
+				disableButtons("character-button", true);
+				disableButtons("delete-from-manager-btn", true);
+				disableButtons("edit-character", true);
+				if (typeof document.getElementById("save-session").onclick != "function")
+				{
+					bindSaveSessionButton();
+				}
+			}
+		}
+		
+		function returnToStartup()
+		{
+			if (characters.length > 0 || partiallyFilledPCForm() || partiallyFilledNPCForm())
+			{
+				var c = confirm("Returning to startup will delete any unsaved data. Continue?");
+				if (c)
+				{
+					characters = [];
+					clearPCForm();
+					clearNPCForm();
+					deleteAllTableRows("character-list-table");
+					hideCharacterForms();
+					hideElement("character-list-header");
+					hideElement("edit-current-session-buttons");
+					hideElement("running-the-session-buttons");
+					showElement("startup-buttons");
+				}
+			}
+			else
+			{
+				hideCharacterForms();
+				hideElement("character-list-header");
+				hideElement("edit-current-session-buttons");
+				hideElement("running-the-session-buttons");
+				showElement("startup-buttons");
+			}
+		}
+		
+		function cancelStartNewSession()
+		{
+			if (characters.length > 0 || partiallyFilledPCForm() || partiallyFilledNPCForm())
+			{
+				var c = confirm("Returning to startup will delete any unsaved data. Continue?");
+				if (c)
+				{
+					characters = [];
+					clearPCForm();
+					clearNPCForm();
+					hideCharacterForms();
+					var s = document.getElementById("character-list-header").style.display;
+					if (s == "block")
+					{
+						hideElement("character-list-header");
+					}
+					hideElement("edit-current-session-buttons");
+					showElement("startup-buttons");
+				}
+			}
+			else
+			{
+				hideCharacterForms();
+				hideElement("edit-current-session-buttons");
+				//hideElement("character-list-header");
+				showElement("startup-buttons");
+			}
+		}
+		
+		function testingOnClickFunctions()
+		{
+			showElement("pc-form");
+			var input = document.getElementById("create-pc-button");
+			input.addEventListener("click", function()
+			{
+				createPC();
+			});
+		}
+		
+		function editSession()
+		{
+			hideElement("running-the-session-buttons");
+			showElement("edit-current-session-buttons");
+			document.getElementById("cancel-session-edit").style.display = "none";
+			var characterBtns = document.getElementsByClassName("character-button");
+			for (var i = 0, elem; elem = characterBtns[i]; i++)
+			{
+				elem.disabled = true;
+			}
+			var deleteBtns = document.getElementsByClassName("delete-from-manager-btn");
+			for (var i = 0, elem; elem = deleteBtns[i]; i++)
+			{
+				elem.disabled = false;
+			}
+			var editBtns = document.getElementsByClassName("edit-character");
+			for (var i = 0, elem; elem = editBtns[i]; i++)
+			{
+				elem.disabled = false;
+			}
+		}
+		
+		function clearPCForm()
+		{
+			document.getElementById("pc-playerName").value = "";
+			document.getElementById("pc-characterName").value = "";
+			document.getElementById("pc-race").value = "";
+			document.getElementById("pc-class").value = "";
+			document.getElementById("pc-passPerc").value = ""
+			document.getElementById("pc-dexterity").value = "";
+			document.getElementById("pc-currHP").value = "";
+		}
+		
+		function clearNPCForm()
+		{
+			document.getElementById("npc-monsterName").value = "";
+			document.getElementById("npc-race").value = "";
+			document.getElementById("npc-hp").value = "";
+			document.getElementById("npc-hitDice").value = "";
+			document.getElementById("npc-modifier").value = "";
+			document.getElementById("npc-dexterity").value = "";
+			document.getElementById("npc-pageNo").value = "";
+			document.getElementById("npc-d4").checked = false;
+			document.getElementById("npc-d6").checked = false;
+			document.getElementById("npc-d8").checked = false;
+			document.getElementById("npc-d10").checked = false;
+			document.getElementById("npc-d12").checked = false;
+			document.getElementById("npc-d20").checked = false;
+		}
+		
+		function partiallyFilledPCForm()
+		{
+			if ((document.getElementById("pc-playerName").value != "") ||
+				(document.getElementById("pc-characterName").value != "") ||
+				(document.getElementById("pc-race").value != "") ||
+				(document.getElementById("pc-class").value != "") ||
+				(document.getElementById("pc-passPerc").value != "") ||
+				(document.getElementById("pc-dexterity").value != "") ||
+				(document.getElementById("pc-currHP").value != ""))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		
+		function partiallyFilledNPCForm()
+		{
+			if ((document.getElementById("npc-monsterName").value != "") ||
+				(document.getElementById("npc-race").value != "") ||
+				(document.getElementById("npc-hp").value != "") ||
+				(document.getElementById("npc-hitDice").value != "") ||
+				(document.getElementById("npc-modifier").value != "") ||
+				(document.getElementById("npc-dexterity").value != "") ||
+				(document.getElementById("npc-pageNo").value != "") ||
+				document.getElementById("npc-d4").checked ||
+				document.getElementById("npc-d6").checked ||
+				document.getElementById("npc-d8").checked ||
+				document.getElementById("npc-d10").checked ||
+				document.getElementById("npc-d12").checked ||
+				document.getElementById("npc-d20").checked)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		
+		function clearPCFormConfirm()
+		{
+			if (partiallyFilledPCForm())
+			{
+				var c = confirm("Canceling will delete any unsaved data. Continue?");
+				if (c)
+				{
+					clearPCForm();
+					hideElement("pc-form");
+					return true;
+				}
+			}
+			else
+			{
+				hideElement("pc-form");
+				return false;
+			}
+		}
+		
+		function clearNPCFormConfirm()
+		{
+			if (partiallyFilledNPCForm())
+			{
+				var c = confirm("Canceling will delete any unsaved data. Continue?");
+				if (c)
+				{
+					clearNPCForm();
+					hideElement("npc-form");
+					return true;
+				}
+			}
+			else
+			{
+				hideElement("npc-form");
+				return false;
+			}
+		}
+		
+		function validateFormField(e, alertMssg)
+		{
+			if (document.getElementById(e).value == "")
+			{
+				alert(alertMssg);
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
+		
+		function validatePCFormComplete()
+		{
+			if (validateFormField("pc-playerName", "Player must have a name."))
+			{
+				if (validateFormField("pc-characterName", "PC must have a name."))
+				{
+					if (validateFormField("pc-race", "PC must have a race."))
+					{
+						if (validateFormField("pc-class", "PC must have a class."))
+						{
+							if (validateFormField("pc-passPerc", "PC must have a passive perception."))
+							{
+								if (validateFormField("pc-dexterity", "PC must have a dexterity modifier."))
+								{
+									if (validateFormField("pc-currHP", "PC must have hit points."))
+									{
+										return true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			return false;
+		}
+
+		function validateNPCFormComplete()
+		{
+			if (validateFormField("npc-race", "NPC must have a race."))
+			{
+				if (document.getElementById("npc-hp").value == "")
+				{
+					if (document.getElementById("npc-hitDice").value == "")
+					{
+						alert("NPC must have total hit points or hit dice specified.")
+						return false;
+					}
+					else
+					{
+						if (!document.getElementById("npc-d4").checked)
+						{
+							if (!document.getElementById("npc-d6").checked)
+							{
+								if (!document.getElementById("npc-d8").checked)
+								{
+									if (!document.getElementById("npc-d10").checked)
+									{
+										if (!document.getElementById("npc-d12").checked)
+										{
+											if (!document.getElementById("npc-d20").checked)
+											{
+												alert("You must check a hit dice option.")
+												return false
+											}
+										}
+									}
+								}
+							}
+						}
+						if (!validateFormField("npc-modifier", "NPC must have a hit point modifier, or 0."))
+						{
+							return false;
+						}
+					}
+				}
+				if (validateFormField("npc-dexterity", "NPC must have a dexterity modifier."))
+				{
+					if (validateFormField("npc-pageNo", "NPC must have a page number, or 0."))
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+		
+		function createPC()
+		{
+			//console.log("508");
+			if (validatePCFormComplete())
+			{
+				var character = {
+					unique : true,
+					pc : true,
+					runaway : false,
+					playerName : document.getElementById("pc-playerName").value,
+					characterName : document.getElementById("pc-characterName").value,
+					characterRace : document.getElementById("pc-race").value,
+					characterClass : document.getElementById("pc-class").value,
+					passivePerception : document.getElementById("pc-passPerc").value,
+					hitPoints : document.getElementById("pc-currHP").value,
+					hitDice : "",
+					d4 : false,
+					d6 : false,
+					d8 : false,
+					d10 : false,
+					d12 : false,
+					d20 : false,
+					modifier : "",
+					dexterity : document.getElementById("pc-dexterity").value,
+					initiative : "",
+					pageNo : ""
+				};
+				characters.push(character);
+				document.getElementById("character-list-header").style.display = "block";
+				addCharacterToColumn(character, characters.length - 1);
+				//bindDeleteButton(characters.length - 1);
+				//bindEditButton(characters.length - 1);
+				//bindCharacterButton(characters.length - 1);
+				//bindEditButtons();
+				clearPCForm();
+				hideElement("pc-form");
+			}
+		}
+		
+		function editPC()
+		{
+			//console.log("541");
+			if (validatePCFormComplete())
+			{
+				var character = {
+					unique : true,
+					pc : true,
+					runaway : false,
+					playerName : document.getElementById("pc-playerName").value,
+					characterName : document.getElementById("pc-characterName").value,
+					characterRace : document.getElementById("pc-race").value,
+					characterClass : document.getElementById("pc-class").value,
+					passivePerception : document.getElementById("pc-passPerc").value,
+					hitPoints : document.getElementById("pc-currHP").value,
+					hitDice : "",
+					d4 : false,
+					d6 : false,
+					d8 : false,
+					d10 : false,
+					d12 : false,
+					d20 : false,
+					modifier : "",
+					dexterity : document.getElementById("pc-dexterity").value,
+					initiative : "",
+					pageNo : ""
+				};
+				characters[pcEdit] = character;
+				document.getElementById("character-button".concat(pcEdit)).value = "*".concat(character.characterName);
+				document.getElementById("character-passive-perception".concat(pcEdit)).innerHTML = "PP: ".concat(character.passivePerception);
+				cancelPCEdit();
+			}
+		}
+		
+		function confirmCancelPCEdit()
+		{
+			cancelPCEdit();
+			/*
+			if (clearPCFormConfirm())
+			{
+				cancelPCEdit();
+				
+				var c = confirm("Canceling will delete any unsaved data. Continue?");
+				if (c)
+				{
+					console.log("639");
+					cancelPCEdit();
+				}
+				
+			}
+			*/
+		}
+		
+		function cancelPCEdit()
+		{
+			clearPCForm();
+			document.getElementById("pc-form-header").innerHTML = "Create PC";
+			showElement("create-pc-form-buttons");
+			hideElement("edit-pc-form-buttons");
+			hideElement("pc-form");
+			pcEdit = null;
+			disableButtons("delete-from-manager-btn", false);
+			disableButtons("edit-character", false);
+		}
+		
+		function createNPC()
+		{
+			if (validateNPCFormComplete())
+			{
+				var character = {
+					unique : false,
+					pc : false,
+					runaway : false,
+					playerName : "",
+					characterName : document.getElementById("npc-monsterName").value,
+					characterRace : document.getElementById("npc-race").value,
+					characterClass : "monster",
+					passivePerception : "",
+					hitPoints : document.getElementById("npc-hp").value,
+					hitDice : document.getElementById("npc-hitDice").value,
+					d4 : document.getElementById("npc-d4").checked,
+					d6 : document.getElementById("npc-d6").checked,
+					d8 : document.getElementById("npc-d8").checked,
+					d10 : document.getElementById("npc-d10").checked,
+					d12 : document.getElementById("npc-d12").checked,
+					d20 : document.getElementById("npc-d20").checked,
+					modifier : document.getElementById("npc-modifier").value,
+					dexterity : document.getElementById("npc-dexterity").value,
+					initiative : "",
+					pageNo : document.getElementById("npc-pageNo").value
+				};
+				if (character.characterName != "")
+				{
+					character.unique = true;
+					/*
+					if (character.hitPoints == "")
+					{
+						character.hitPoints = rollForHP(character);
+					}
+					*/
+				}
+				characters.push(character);
+				document.getElementById("character-list-header").style.display = "block";
+				addCharacterToColumn(character, characters.length - 1);
+				//bindDeleteButton(characters.length - 1);
+				//bindEditButton(characters.length - 1);
+				//bindCharacterButton(characters.length - 1);
+				clearNPCForm();
+				hideElement("npc-form");
+			}
+		}
+		
+		function editNPC()
+		{
+			if (validateNPCFormComplete())
+			{
+				var character = {
+					unique : false,
+					pc : false,
+					runaway : false,
+					playerName : "",
+					characterName : document.getElementById("npc-monsterName").value,
+					characterRace : document.getElementById("npc-race").value,
+					characterClass : "monster",
+					passivePerception : "",
+					hitPoints : document.getElementById("npc-hp").value,
+					hitDice : document.getElementById("npc-hitDice").value,
+					d4 : document.getElementById("npc-d4").checked,
+					d6 : document.getElementById("npc-d6").checked,
+					d8 : document.getElementById("npc-d8").checked,
+					d10 : document.getElementById("npc-d10").checked,
+					d12 : document.getElementById("npc-d12").checked,
+					d20 : document.getElementById("npc-d20").checked,
+					modifier : document.getElementById("npc-modifier").value,
+					dexterity : document.getElementById("npc-dexterity").value,
+					initiative : "",
+					pageNo : document.getElementById("npc-pageNo").value
+				};
+				if (character.characterName != "")
+				{
+					character.unique = true;
+				}
+				characters[npcEdit] = character;
+				if (character.characterName != "")
+				{
+					document.getElementById("character-button".concat(npcEdit)).value = "*".concat(character.characterName);
+				}
+				else
+				{
+					document.getElementById("character-button".concat(npcEdit)).value = character.characterRace;
+				}
+				cancelNPCEdit();
+			}
+		}
+		
+		function confirmCancelNPCEdit()
+		{
+			if (clearNPCFormConfirm())
+			{
+				cancelNPCEdit();
+			}
+		}
+		
+		function cancelNPCEdit()
+		{
+			clearNPCForm();
+			document.getElementById("npc-form-header").innerHTML = "Create NPC";
+			showElement("create-npc-form-buttons");
+			hideElement("edit-npc-form-buttons");
+			hideElement("npc-form");
+			npcEdit = null;
+			disableButtons("delete-from-manager-btn", false);
+			disableButtons("edit-character", false);
+		}
+		
+		function rollForHP(i)
+		{
+			if (characters[i].d4)
+			{
+				var d = 4;
+			}
+			else
+			{
+				if (characters[i].d6)
+				{
+					var d = 6;
+				}
+				else
+				{
+					if (characters[i].d8)
+					{
+						var d = 8;
+					}
+					else
+					{
+						if (characters[i].d10)
+						{
+							var d = 10;
+						}
+						else
+						{
+							if (characters[i].d12)
+							{
+								var d = 12;
+							}
+							else
+							{
+								if (characters[i].d20)
+								{
+									var d = 20;
+								}
+							}
+						}
+					}
+				}
+			}
+			var roll = 0;
+			var hd = Number(characters[i].hitDice);
+			for (j = 0; j < hd; j++)
+			{
+				roll += (Math.floor(Math.random() * d) + 1);
+			}
+			roll += Number(characters[i].modifier);
+			return roll;
+		}
+		
+		function addCharacterToColumn(c, i)
+		{
+			//console.log("133");
+			var table = document.getElementById("character-list-table");
+			var tr = document.createElement("tr");
+			tr.className = "character-row";
+			tr.id = "character-row-".concat(i);
+			table.appendChild(tr);
+	
+			td = document.createElement("td");
+			tr.appendChild(td);
+	
+			var input = document.createElement("input");
+			input.type = "button";
+			input.id = "character-button".concat(i);
+			input.className = "character-button";
+			input.style = "width:150px;"
+			if (c.unique)
+			{
+				input.value = "*".concat(c.characterName);
+				//input.style = "color:DarkRed;width:120px";
+			}
+			else
+			{
+				input.value = c.characterRace;
+				//input.style = "color:black;width:120px";
+			}
+			input.disabled = true;
+			input.addEventListener("click", function() {bindCharacterButton(this, i)}, false);
+			td.appendChild(input);
+	
+			td = document.createElement("td");
+			tr.appendChild(td);
+	
+			input = document.createElement("input");
+			input.type = "button";
+			input.className = "delete-from-manager-btn";
+			input.id = "delete-from-manager-btn".concat(i);
+			input.value = "X Delete";
+			input.addEventListener("click", function() {bindDeleteButton(i)}, false);
+			td.appendChild(input);
+	
+			td = document.createElement("td");
+			tr.appendChild(td);
+
+			input = document.createElement("input");
+			input.type = "button";
+			input.id = "edit-character".concat(i);
+			input.className = "edit-character";
+			input.value = "Edit";
+			input.addEventListener("click", function() {bindEditButton(i)}, false);
+			td.appendChild(input);
+			
+			td = document.createElement("td");
+			tr.appendChild(td);
+			
+			p = document.createElement("p");
+			p.className = "passiver-perception-indicator";
+			p.id = "character-passive-perception".concat(i);
+			p.innerHTML = "PP: ".concat(c.passivePerception);
+			td.appendChild(p);
+		}
+		
+		function deleteAllTableRows(tableId)
+		{
+			var rows = document.getElementById(tableId).rows.length;
+			for (var i = rows - 1; i >= 0; i--)
+			{
+				document.getElementById(tableId).deleteRow(i);
+			}
+		}
+		
+		function bindDeleteButton(i)
+		{
+			var c = confirm("Are you sure you want to delete this character?");
+			if (c)
+			{
+				var row = document.getElementById("character-row-".concat(i));
+				delete characters[Number(i)];
+				//var r = this.parentNode.parentNode.rowIndex;
+				document.getElementById("character-list-table").deleteRow(row.rowIndex);
+			
+				if (document.getElementById("character-list-table").rows.length == 0)
+				{
+					document.getElementById("character-list-header").style.display = "none";
+				}
+			}
+		}
+		
+		/*
+		function bindDeleteButton(i)
+		{
+			var elem = document.getElementById("delete-from-manager-btn".concat(i));
+			elem.addEventListener("click", function()
+			{
+				var c = confirm("Are you sure you want to delete this character?");
+				if (c)
+				{
+					delete characters[Number(i)];
+					var r = this.parentNode.parentNode.rowIndex;
+					document.getElementById("character-list-table").deleteRow(r);
+				
+					if (document.getElementById("character-list-table").rows.length == 0)
+					{
+						document.getElementById("character-list-header").style.display = "none";
+					}
+				}
+			}, false);
+		}
+		*/
+		
+		function bindEditButton(i)
+		{
+			disableButtons("delete-from-manager-btn", true);
+			disableButtons("edit-character", true);
+			if (characters[i].pc)
+			{
+				showElement("pc-form");
+				document.getElementById("pc-form-header").innerHTML = "Edit PC";
+				hideElement("create-pc-form-buttons");
+				showElement("edit-pc-form-buttons");
+				pcEdit = Number(i);
+				document.getElementById("pc-playerName").value = characters[i].playerName;
+				document.getElementById("pc-characterName").value = characters[i].characterName;
+				document.getElementById("pc-race").value = characters[i].characterRace;
+				document.getElementById("pc-class").value = characters[i].characterClass;
+				document.getElementById("pc-passPerc").value = characters[i].passivePerception;
+				document.getElementById("pc-dexterity").value = characters[i].dexterity;
+				document.getElementById("pc-currHP").value = characters[i].hitPoints;
+			}
+			else
+			{
+				showElement("npc-form");
+				document.getElementById("npc-form-header").innerHTML = "Edit NPC";
+				hideElement("create-npc-form-buttons");
+				showElement("edit-npc-form-buttons");
+				npcEdit = Number(i);
+				document.getElementById("npc-monsterName").value = characters[i].characterName;
+				document.getElementById("npc-race").value = characters[i].characterRace;
+				document.getElementById("npc-hp").value = characters[i].hitPoints;
+				document.getElementById("npc-hitDice").value = characters[i].hitDice;
+				document.getElementById("npc-modifier").value = characters[i].modifier;
+				document.getElementById("npc-dexterity").value = characters[i].dexterity;
+				document.getElementById("npc-pageNo").value = characters[i].pageNo;
+				if (characters[i].d4)
+				{
+					document.getElementById("npc-d4").checked = true;
+				}
+				else
+				{
+					if (characters[i].d6)
+					{
+						document.getElementById("npc-d6").checked = true;
+					}
+					else
+					{
+						if (characters[i].d8)
+						{
+							document.getElementById("npc-d8").checked = true;
+						}
+						else
+						{
+							if (characters[i].d10)
+							{
+								document.getElementById("npc-d10").checked = true;
+							}
+							else
+							{
+								if (characters[i].d12)
+								{
+									document.getElementById("npc-d12").checked = true;
+								}
+								else
+								{
+									if (characters[i].d20)
+									{
+										document.getElementById("npc-d20").checked = true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		/*
+		function bindEditButton(i)
+		{
+			var input = document.getElementById("edit-character".concat(i));
+			input.addEventListener("click", function()
+			{
+				disableButtons("delete-from-manager-btn", true);
+				disableButtons("edit-character", true);
+				if (characters[i].pc)
+				{
+					showElement("pc-form");
+					document.getElementById("pc-form-header").innerHTML = "Edit PC";
+					hideElement("create-pc-form-buttons");
+					showElement("edit-pc-form-buttons");
+					pcEdit = Number(i);
+					document.getElementById("pc-playerName").value = characters[i].playerName;
+					document.getElementById("pc-characterName").value = characters[i].characterName;
+					document.getElementById("pc-race").value = characters[i].characterRace;
+					document.getElementById("pc-class").value = characters[i].characterClass;
+					document.getElementById("pc-passPerc").value = characters[i].passivePerception;
+					document.getElementById("pc-dexterity").value = characters[i].dexterity;
+					document.getElementById("pc-currHP").value = characters[i].hitPoints;
+				}
+				else
+				{
+					showElement("npc-form");
+					document.getElementById("npc-form-header").innerHTML = "Edit NPC";
+					hideElement("create-npc-form-buttons");
+					showElement("edit-npc-form-buttons");
+					npcEdit = Number(i);
+					document.getElementById("npc-monsterName").value = characters[i].characterName;
+					document.getElementById("npc-race").value = characters[i].characterRace;
+					document.getElementById("npc-hp").value = characters[i].hitPoints;
+					document.getElementById("npc-hitDice").value = characters[i].hitDice;
+					document.getElementById("npc-modifier").value = characters[i].modifier;
+					document.getElementById("npc-dexterity").value = characters[i].dexterity;
+					document.getElementById("npc-pageNo").value = characters[i].pageNo;
+					if (characters[i].d4)
+					{
+						document.getElementById("npc-d4").checked = true;
+					}
+					else
+					{
+						if (characters[i].d6)
+						{
+							document.getElementById("npc-d6").checked = true;
+						}
+						else
+						{
+							if (characters[i].d8)
+							{
+								document.getElementById("npc-d8").checked = true;
+							}
+							else
+							{
+								if (characters[i].d10)
+								{
+									document.getElementById("npc-d10").checked = true;
+								}
+								else
+								{
+									if (characters[i].d12)
+									{
+										document.getElementById("npc-d12").checked = true;
+									}
+									else
+									{
+										if (characters[i].d20)
+										{
+											document.getElementById("npc-d20").checked = true;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}, false);
+		}
+		*/
+		function bindCharacterButton(thisBtn, i)
+		{
+			var table = document.getElementById("pre-encounter-table");
+			var tr = document.createElement("tr");
+			tr.className = "pre-encounter-row";
+			table.appendChild(tr);
+			
+			td = document.createElement("td");
+			tr.appendChild(td);
+			
+			var p = document.createElement("p");
+			p.className = "pre-encounter-character-field";
+			p.id = i;
+			p.style = "width:120px;";
+			if (characters[Number(i)].pc)
+			{
+				p.innerHTML = "*".concat(characters[Number(i)].characterName);
+			}
+			else
+			{
+				if (characters[Number(i)].unique)
+				{
+					p.innerHTML = "*".concat(characters[Number(i)].characterName);
+				}
+				else
+				{
+					p.innerHTML = characters[Number(i)].characterRace;
+				}
+			}
+			td.appendChild(p);
+			
+			td = document.createElement("td");
+			tr.appendChild(td);
+
+			var btn = document.createElement("input");
+			btn.type = "button";
+			btn.className = "delete-from-pre-encounter";
+			btn.id = "delete-from-pre-encounter".concat(i);
+			btn.value = "X Delete";
+			btn.addEventListener("click", function() {removeFromPreEncounter(i)}, false);
+			td.appendChild(btn);
+			
+			td = document.createElement("td");
+			tr.appendChild(td);
+			
+			if (characters[Number(i)].pc)
+			{
+				var field = document.createElement("input");
+				field.className = "initiative-input";
+				field.id = "initiative-input".concat(i);
+				field.type = "number";
+				field.placeholder = "initaitve required";
+				td.appendChild(field);
+			}
+			
+			td = document.createElement("td");
+			tr.appendChild(td);
+			
+			if (!characters[Number(i)].unique)
+			{
+				field = document.createElement("input");
+				field.className = "non-uniques-count";
+				field.id = "non-uniques-count".concat(i);
+				field.type = "number";
+				field.placeholder = "how many?";
+				td.appendChild(field);
+			}
+			thisBtn.disabled = true;
+		}
+		
+		function disableButtons(btnClass, a)
+		{
+			var buttons = document.getElementsByClassName(btnClass);
+			for (var i = 0, elem; elem = buttons[i]; i++)
+			{
+				elem.disabled = a;
+			}
+		}
+		
+		function startNewEncounter()
+		{
+			hideElement("running-the-session-buttons");
+			showElement("encounter-buttons");
+			disableButtons("character-button", false);
+			//disableButtons("delete-from-manager-btn", true);
+			//disableButtons("edit-character", false);
+			document.getElementById("roll-for-initiative").style.display = "block";
+		}
+		
+		function endEncounter()
+		{
+			createRunawayNPCs();
+			removeRunaways();
+			showElement("begin-encounter!");
+			document.getElementById("cancel-encounter").innerHTML = "Cancel";
+			hideElement("encounter-buttons");
+			showElement("running-the-session-buttons");
+			disableButtons("character-button", true);
+			deleteAllTableRows("pre-encounter-table");
+			hideElement("encounter-table");
+			deleteAllTableRows("encounter-body-i");
+			hideElement("roll-for-initiative");
+			showElement("character-list-header")
+			encountPart = [];
+		}
+		
+		function createRunawayNPCs()
+		{
+			var idsUsed = document.getElementsByClassName("character-index");
+			for (var i = 0, elem; elem = idsUsed[i]; i++)
+			{
+				var charId = Number(elem.innerHTML)
+				if (!characters[charId].unique)
+				{
+					//console.log(this.parentNode);
+					var hp = elem.parentNode.previousSibling.previousSibling.previousSibling.previousSibling.previousSibling.previousSibling.firstChild.innerHTML;
+					console.log(hp);
+					if (hp > 0)
+					{
+						var character = {
+							unique : true,
+							pc : false,
+							runaway : true,
+							playerName : "",
+							characterName : "Runaway ".concat(characters[charId].characterRace).concat(", hp: ").concat(hp),
+							characterRace : characters[charId].characterRace,
+							characterClass : "monster",
+							passivePerception : "",
+							hitPoints : hp,
+							hitDice : "",
+							d4 : false,
+							d6 : false,
+							d8 : false,
+							d10 : false,
+							d12 : false,
+							d20 : false,
+							modifier : "",
+							dexterity : characters[charId].dexterity,
+							initiative : "",
+							pageNo : characters[charId].pageNo
+						};
+						characters.push(character);
+						//document.getElementById("character-list-header").style.display = "block";
+						addCharacterToColumn(character, characters.length - 1);
+						//document.getElementById("character-button".concat(characters.length - 1)).disabled = true;
+						document.getElementById("delete-from-manager-btn".concat(characters.length - 1)).disabled = true;
+						document.getElementById("edit-character".concat(characters.length - 1)).disabled = true;
+					}
+				}
+			}
+		}
+		
+		function removeRunaways()
+		{
+			console.log("1284");
+			for (var i = 0, c; c = characters[i]; i++)
+			{
+				console.log("1285");
+				if (c.runaway && c.hitPoints <= 0)
+				{
+					console.log("1288");
+					delete characters[i];
+					var row = document.getElementById("character-row-".concat(i));
+					//var r = this.parentNode.parentNode.rowIndex;
+					document.getElementById("character-list-table").deleteRow(row.rowIndex);
+					if (document.getElementById("character-list-table").rows.length == 0)
+					{
+						document.getElementById("character-list-header").style.display = "none";
+					}
+				}
+			}
+		}
+		
+		function removeFromPreEncounter(i)
+		{
+			if (characters[i].pc)
+			{
+				document.getElementById("initiative-input".concat(i)).value = "";
+			}
+			else
+			{
+				if (!characters[i].unique)
+				{
+					document.getElementById("non-uniques-count".concat(i)).value = "";
+				}
+			}
+			var elem = document.getElementById("delete-from-pre-encounter".concat(i));
+			var r = elem.parentNode.parentNode.rowIndex;
+			document.getElementById("pre-encounter-table").deleteRow(r);
+			document.getElementById("character-button".concat(i)).disabled = false;
+		}
+		
+		function encounterIsValid()
+		{
+			var table = document.getElementById("pre-encounter-table");
+			var rows = table.rows.length;
+			if (rows == 0)
+			{
+				alert("You must add characters to the encounter to start.");
+				return false;
+			}
+			var initiatives = document.getElementsByClassName("initiative-input");
+			if (initiatives.length == 0)
+			{
+				alert("You must add at least 1 PC to the encounter to start.");
+				return false;
+			}
+			for (var i = 0, elem; elem = initiatives[i]; i++)
+			{
+				if (elem.value == "")
+				{
+					alert("Each PC must have an initiative roll to begin the encounter.");
+					return false;
+				}
+			}
+			var monsters = document.getElementsByClassName("non-uniques-count");
+			for (var i = 0, elem; elem = monsters[i]; i++)
+			{
+				if (elem.value == "")
+				{
+					alert("You must specify the number of monsters for each NPC.");
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		function startEncounter()
+		{
+			if (encounterIsValid())
+			{
+				hideElement("begin-encounter!");
+				document.getElementById("cancel-encounter").innerHTML = "End Encounter";
+				hideElement("character-list-header");
+				var fighters = document.getElementsByClassName("pre-encounter-character-field");
+				for (var i = 0, elem; elem = fighters[i]; i++)
+				{
+					//console.log(i);
+					//console.log(characters[Number(elem.id)])
+					if (characters[Number(elem.id)].pc)
+					{
+						var init = document.getElementById("initiative-input".concat(elem.id)).value;
+						//console.log(characters[Number(elem.id)])
+						encountPart.push({characterId : elem.id, initiative : Number(init)});
+					}
+					else
+					{
+						//console.log(characters[Number(elem.id)])
+						if (characters[Number(elem.id)].unique)
+						{
+							encountPart.push({characterId : elem.id, initiative : rollForInitiative(Number(elem.id))});
+						}
+						else
+						{
+							var count = Number(elem.parentNode.nextSibling.nextSibling.nextSibling.firstChild.value);
+							for (var j = 0; j < count; j++)
+							{
+								encountPart.push({characterId : elem.id, initiative : rollForInitiative(Number(elem.id))});
+							}
+						}
+					}
+				}
+				encountPart.sort(compare);
+				fillEncounterTable();
+			}
+		}
+		
+		function rollForInitiative(i)
+		{
+			var roll = Math.floor(Math.random() * 20) + 1;
+			if (roll == 1 || roll == 20)
+			{
+				return roll;
+			}
+			else
+			{
+				return roll + Number(characters[i].dexterity);
+			}
+		}
+		
+		function compare(a, b)
+		{
+			if (a.initiative > b.initiative)
+			{
+				return -1;
+			}
+			if (a.initiative < b.initiative)
+			{
+				return 1;
+			}
+			if (a.initiative == b.initiative)
+			{
+				if (characters[Number(a.characterId)].dexterity > characters[Number(b.characterId)].dexterity)
+				{
+					return -1;
+				}
+				if (characters[Number(a.characterId)].dexterity < characters[Number(b.characterId)].dexterity)
+				{
+					return 1;
+				}
+			}
+			return 0;
+		}
+		
+		function fillEncounterTable()
+		{
+			//console.log("here");
+			deleteAllTableRows("pre-encounter-table");
+			hideElement("roll-for-initiative");
+			showElement("encounter-table");
+			var table = document.getElementById("encounter-table").getElementsByTagName("tbody")[0];
+			var l = encountPart.length;
+			for (var i = 0; i < l; i++)
+			{
+				var newRow = table.insertRow(table.rows.length);
+				td = document.createElement("td");
+				newRow.appendChild(td);
+				
+				var field = document.createElement("input");
+				field.className = "spells-affecting";
+				td.appendChild(field);
+				
+				td = document.createElement("td");
+				newRow.appendChild(td);
+				
+				field = document.createElement("input");
+				field.className = "spells-using";
+				td.appendChild(field);
+				
+				td = document.createElement("td");
+				newRow.appendChild(td);
+				
+				var p = document.createElement("p");
+				p.className = "encounter-character-field";
+				p.style = "width:100px;";
+				if (characters[Number(encountPart[i].characterId)].pc || characters[Number(encountPart[i].characterId)].unique)
+				{
+					p.innerHTML = characters[Number(encountPart[i].characterId)].characterName;
+				}
+				else
+				{
+					p.innerHTML = characters[Number(encountPart[i].characterId)].characterRace;
+				}
+				td.appendChild(p);
+				
+				td = document.createElement("td");
+				newRow.appendChild(td);
+				
+				p = document.createElement("p");
+				p.className = "character-initiative";
+				p.style = "width:20px;";
+				p.innerHTML = encountPart[i].initiative;
+				td.appendChild(p);
+				
+				td = document.createElement("td");
+				newRow.appendChild(td);
+				
+				p = document.createElement("p");
+				p.className = "character-hp";
+				p.style = "width:20px;";
+				if (characters[Number(encountPart[i].characterId)].pc)
+				{
+					p.innerHTML = characters[Number(encountPart[i].characterId)].hitPoints;
+				}
+				else
+				{
+					if (characters[Number(encountPart[i].characterId)].hitPoints == "")
+					{
+						p.innerHTML = rollForHP(Number(encountPart[i].characterId));
+					}
+					else
+					{
+						p.innerHTML = characters[Number(encountPart[i].characterId)].hitPoints;
+					}
+				}
+				td.appendChild(p);
+				
+				td = document.createElement("td");
+				newRow.appendChild(td);
+				
+				p = document.createElement("p");
+				p.className = "character-page-number";
+				p.style = "width:20px;";
+				p.innerHTML = characters[Number(encountPart[i].characterId)].pageNo;
+				td.appendChild(p);
+				
+				td = document.createElement("td");
+				newRow.appendChild(td);
+				
+				field = document.createElement("input");
+				field.className = "subtract-hp-field";
+				field.type = "number";
+				td.appendChild(field);
+				
+				td = document.createElement("td");
+				newRow.appendChild(td);
+				
+				var button = document.createElement("input");
+				button.type = "button";
+				button.className = "subtract-hp-button";
+				button.value = "subtract HP";
+				button.addEventListener("click", function() {subtractHitPoints(this)}, false);
+				//button.addEventListener("click", function() {subtractHP()}, false);
+				td.appendChild(button);
+				/*
+				td = document.createElement("td");
+				newRow.appendChild(td);
+				
+				button = document.createElement("input");
+				button.type = "button";
+				button.className = "kill-character";
+				button.value = "Remove";
+				//button.addEventListener("click", function() {subtractHP()}, false);
+				td.appendChild(button);
+				*/
+				
+				td = document.createElement("td");
+				newRow.appendChild(td);
+				
+				field = document.createElement("input");
+				field.className = "add-hp-field";
+				field.type = "number";
+				td.appendChild(field);
+				
+				td = document.createElement("td");
+				newRow.appendChild(td);
+				
+				var button = document.createElement("input");
+				button.type = "button";
+				button.className = "add-hp-button";
+				button.value = "add HP";
+				button.addEventListener("click", function() {addHitPoints(this)}, false);
+				//button.addEventListener("click", function() {subtractHP()}, false);
+				td.appendChild(button);
+				
+				td = document.createElement("td");
+				newRow.appendChild(td);
+				
+				p = document.createElement("p");
+				p.className = "character-index";
+				p.style = "display:none";
+				p.innerHTML = encountPart[i].characterId;
+				td.appendChild(p);
+			}
+		}
+		
+		function subtractHitPoints(elem)
+		{
+			var subtractField = elem.parentNode.previousSibling.firstChild;
+			var charName = elem.parentNode.previousSibling.previousSibling.previousSibling.previousSibling.previousSibling;
+			if (subtractField.value == "")
+			{
+				alert("Please input a hit-point amount to subtract.");
+			}
+			else
+			{
+				var hpElem = elem.parentNode.previousSibling.previousSibling.previousSibling.firstChild;
+				var currHP = Number(hpElem.innerHTML);
+				var subtract = Number(subtractField.value);
+				var newHP = currHP - subtract;
+				hpElem.innerHTML = newHP;
+				/*
+				if (newHP < 0)
+				{
+					charName.style.textDecoration = "line-through";
+					//charName.style.setProperty("text-decoration", "line-through");
+				}
+				*/
+				subtractField.value = "";
+				var i = Number(elem.parentNode.nextSibling.nextSibling.nextSibling.firstChild.innerHTML);
+				if (characters[i].unique)
+				{
+					characters[i].hitPoints = Number(hpElem.innerHTML);
+				}
+			}
+		}
+		// clear out input field
+		function addHitPoints(elem)
+		{
+			var addField = elem.parentNode.previousSibling.firstChild;
+			var charName = elem.parentNode.previousSibling.previousSibling.previousSibling.previousSibling.previousSibling.previousSibling;
+			if (addField.value == "")
+			{
+				alert("Please input a hit-point amount to add.");
+			}
+			else
+			{
+				var hpElem = elem.parentNode.previousSibling.previousSibling.previousSibling.previousSibling.previousSibling.firstChild;
+				var currHP = Number(hpElem.innerHTML);
+				var add = Number(addField.value);
+				var newHP = currHP + add;
+				hpElem.innerHTML = newHP;
+				/*
+				//if (charName.style.getProperty("text-decoration") == "line-through")
+				if (charName.style.textDecoration == "line-through")
+				{
+					if (newHP > 0)
+					{
+						charName.style.textDecoration = "none";
+						//charName.style.setProperty("text-decoration", "none");
+					}
+				}
+				*/
+				addField.value = "";
+				var i = Number(elem.parentNode.nextSibling.firstChild.innerHTML);
+				if (characters[i].unique)
+				{
+					characters[i].hitPoints = Number(hpElem.innerHTML);
+				}
+			}
+		}
+		
+		function bindSaveSessionButton()
+		{
+			var s = document.getElementById("save-session");
+			s.addEventListener("click", function()
+			{
+				var characters_clean = [];
+				var l = characters.length;
+				for (var i = 0; i < l; i++)
+				//for (var i = 0, c; c = characters[i]; i++)
+				{
+					console.log(i);
+					if (characters[i] != null)
+					{
+						characters_clean.push(characters[i]);
+					}
+				}
+				download("data = ".concat(JSON.stringify(characters_clean)), "session_data.json", "text/plain");
+			}, false);
+		}
+		
+		function download(content, fileName, contentType)
+		{
+		    //var a = document.getElementById("save-session");
+			var a = document.createElement("a");
+		    var file = new Blob([content], {type: contentType});
+		    a.href = URL.createObjectURL(file);
+		    a.download = fileName;
+		    a.click();
+		}
+		
+		function loadPreviousSession()
+		{
+			var prev_data = data;
+			hideElement("startup-buttons");
+			showElement("running-the-session-buttons");
+			document.getElementById("character-list-header").style.display = "block";
+			for (var i = 0, d; d = data[i]; i++)
+			{
+				characters.push(data[i]);
+				addCharacterToColumn(data[i], i);
+			}
+			disableButtons("delete-from-manager-btn", true);
+			disableButtons("edit-character", true);
+		}
+		
+	</script>
+	
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
